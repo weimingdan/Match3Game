@@ -12,13 +12,13 @@ namespace
 using ItemType = BoardModel::ItemType;
 
 constexpr int kBoardRows = 8;
-constexpr int kBoardColumns = 8;
+constexpr int kBoardColumns = 9;
 
-constexpr std::array<QPoint, 13> kInitialBoxPositions = {
-    QPoint(0, 4), QPoint(7, 4),
-    QPoint(0, 5), QPoint(6, 5), QPoint(7, 5),
-    QPoint(0, 6), QPoint(6, 6), QPoint(7, 6),
-    QPoint(0, 7), QPoint(1, 7), QPoint(5, 7), QPoint(6, 7), QPoint(7, 7)
+constexpr std::array<QPoint, 33> kInitialBoxPositions = {
+    QPoint(0, 4), QPoint(1, 4), QPoint(2, 4), QPoint(6, 4), QPoint(7, 4), QPoint(8, 4),
+    QPoint(0, 5), QPoint(1, 5), QPoint(2, 5), QPoint(3, 5), QPoint(4, 5), QPoint(5, 5), QPoint(6, 5), QPoint(7, 5), QPoint(8, 5),
+    QPoint(0, 6), QPoint(1, 6), QPoint(2, 6), QPoint(3, 6), QPoint(4, 6), QPoint(5, 6), QPoint(6, 6), QPoint(7, 6), QPoint(8, 6),
+    QPoint(0, 7), QPoint(1, 7), QPoint(2, 7), QPoint(3, 7), QPoint(4, 7), QPoint(5, 7), QPoint(6, 7), QPoint(7, 7), QPoint(8, 7)
 };
 
 QVector<int> uniqueSorted(const QVector<int> &values)
@@ -815,11 +815,11 @@ void BoardModel::activateSpecialSwap()
         const int oppositeRocketIndex = findOppositeRocketTarget(rocketIndex);
         if (oppositeRocketIndex >= 0) {
             const QPoint oppositePoint = fromCellIndex(oppositeRocketIndex);
-            addLineEffect(oppositePoint.y(), oppositePoint.x(), true, &effect.hitCells, &effect.adjacentBoxHits);
-            addLineEffect(oppositePoint.y(), oppositePoint.x(), false, &effect.hitCells, &effect.adjacentBoxHits);
+            addLineEffect(oppositePoint.y(), oppositePoint.x(), true, &effect.hitCells, &effect.adjacentBoxHits, &effect.directBoxHits, false);
+            addLineEffect(oppositePoint.y(), oppositePoint.x(), false, &effect.hitCells, &effect.adjacentBoxHits, &effect.directBoxHits, false);
             effect.status = QStringLiteral("Rocket + propeller combo: cross clear fires from the opposite rocket.");
         } else {
-            addRocketEffect(rocketIndex, &effect.hitCells, &effect.adjacentBoxHits);
+            addRocketEffect(rocketIndex, &effect.hitCells, &effect.adjacentBoxHits, &effect.directBoxHits);
             effect.status = QStringLiteral("Rocket + propeller combo fell back to the swapped rocket effect.");
         }
 
@@ -850,7 +850,7 @@ void BoardModel::activateSpecialItems(const QVector<int> &specialIndices, bool a
 
         const Cell &cell = m_cells[index];
         if (isRocket(cell)) {
-            addRocketEffect(index, &effect.hitCells, &effect.adjacentBoxHits);
+            addRocketEffect(index, &effect.hitCells, &effect.adjacentBoxHits, &effect.directBoxHits);
         } else if (cell.type == ItemType::Bomb) {
             addBombEffect(index, &effect.hitCells, &effect.directBoxHits);
         } else if (cell.type == ItemType::Propeller) {
@@ -908,23 +908,28 @@ void BoardModel::resolveEffectResult(const EffectResult &effect)
     });
 }
 
-void BoardModel::addLineEffect(int row, int column, bool horizontal, QVector<int> *hitCells, QVector<int> *adjacentBoxHits) const
+void BoardModel::addLineEffect(int row, int column, bool horizontal, QVector<int> *hitCells, QVector<int> *adjacentBoxHits, QVector<int> *directBoxHits, bool allowAdjacentBoxHits) const
 {
     if (horizontal) {
         for (int currentColumn = 0; currentColumn < kColumns; ++currentColumn) {
             const int index = toCellIndex(row, currentColumn);
             hitCells->push_back(index);
+            if (isBox(m_cells[index])) {
+                directBoxHits->push_back(index);
+            }
 
-            for (const QPoint &offset : { QPoint(1, 0), QPoint(-1, 0), QPoint(0, 1), QPoint(0, -1) }) {
-                const int nextColumn = currentColumn + offset.x();
-                const int nextRow = row + offset.y();
-                if (!isInBounds(nextRow, nextColumn)) {
-                    continue;
-                }
+            if (allowAdjacentBoxHits) {
+                for (const QPoint &offset : { QPoint(1, 0), QPoint(-1, 0), QPoint(0, 1), QPoint(0, -1) }) {
+                    const int nextColumn = currentColumn + offset.x();
+                    const int nextRow = row + offset.y();
+                    if (!isInBounds(nextRow, nextColumn)) {
+                        continue;
+                    }
 
-                const int candidateIndex = toCellIndex(nextRow, nextColumn);
-                if (isBox(m_cells[candidateIndex])) {
-                    adjacentBoxHits->push_back(candidateIndex);
+                    const int candidateIndex = toCellIndex(nextRow, nextColumn);
+                    if (isBox(m_cells[candidateIndex])) {
+                        adjacentBoxHits->push_back(candidateIndex);
+                    }
                 }
             }
         }
@@ -932,24 +937,29 @@ void BoardModel::addLineEffect(int row, int column, bool horizontal, QVector<int
         for (int currentRow = 0; currentRow < kRows; ++currentRow) {
             const int index = toCellIndex(currentRow, column);
             hitCells->push_back(index);
+            if (isBox(m_cells[index])) {
+                directBoxHits->push_back(index);
+            }
 
-            for (const QPoint &offset : { QPoint(1, 0), QPoint(-1, 0), QPoint(0, 1), QPoint(0, -1) }) {
-                const int nextColumn = column + offset.x();
-                const int nextRow = currentRow + offset.y();
-                if (!isInBounds(nextRow, nextColumn)) {
-                    continue;
-                }
+            if (allowAdjacentBoxHits) {
+                for (const QPoint &offset : { QPoint(1, 0), QPoint(-1, 0), QPoint(0, 1), QPoint(0, -1) }) {
+                    const int nextColumn = column + offset.x();
+                    const int nextRow = currentRow + offset.y();
+                    if (!isInBounds(nextRow, nextColumn)) {
+                        continue;
+                    }
 
-                const int candidateIndex = toCellIndex(nextRow, nextColumn);
-                if (isBox(m_cells[candidateIndex])) {
-                    adjacentBoxHits->push_back(candidateIndex);
+                    const int candidateIndex = toCellIndex(nextRow, nextColumn);
+                    if (isBox(m_cells[candidateIndex])) {
+                        adjacentBoxHits->push_back(candidateIndex);
+                    }
                 }
             }
         }
     }
 }
 
-void BoardModel::addRocketEffect(int index, QVector<int> *hitCells, QVector<int> *adjacentBoxHits) const
+void BoardModel::addRocketEffect(int index, QVector<int> *hitCells, QVector<int> *adjacentBoxHits, QVector<int> *directBoxHits) const
 {
     if (index < 0 || index >= m_cells.size()) {
         return;
@@ -958,9 +968,9 @@ void BoardModel::addRocketEffect(int index, QVector<int> *hitCells, QVector<int>
     const QPoint position = fromCellIndex(index);
     const Cell &rocketCell = m_cells[index];
     if (rocketCell.type == ItemType::RocketHorizontal) {
-        addLineEffect(position.y(), position.x(), true, hitCells, adjacentBoxHits);
+        addLineEffect(position.y(), position.x(), true, hitCells, adjacentBoxHits, directBoxHits, false);
     } else if (rocketCell.type == ItemType::RocketVertical) {
-        addLineEffect(position.y(), position.x(), false, hitCells, adjacentBoxHits);
+        addLineEffect(position.y(), position.x(), false, hitCells, adjacentBoxHits, directBoxHits, false);
     }
 }
 
@@ -992,7 +1002,19 @@ void BoardModel::addPropellerEffect(int index, bool allowBoxTarget, QVector<int>
         return;
     }
 
+    const QPoint center = fromCellIndex(index);
     hitCells->push_back(index);
+
+    for (const QPoint &offset : { QPoint(1, 0), QPoint(-1, 0), QPoint(0, 1), QPoint(0, -1) }) {
+        const int nextColumn = center.x() + offset.x();
+        const int nextRow = center.y() + offset.y();
+        if (!isInBounds(nextRow, nextColumn)) {
+            continue;
+        }
+
+        const int candidateIndex = toCellIndex(nextRow, nextColumn);
+        hitCells->push_back(candidateIndex);
+    }
 
     if (!allowBoxTarget) {
         return;

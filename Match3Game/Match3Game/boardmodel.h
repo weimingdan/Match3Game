@@ -173,8 +173,8 @@ private:
     void activateSpecialSwap();
     void activateSpecialItems(const QVector<int> &specialIndices, bool allowPropellerTarget, const QString &statusText);
     void resolveEffectResult(const EffectResult &effect);
-    void addLineEffect(int row, int column, bool horizontal, QVector<int> *hitCells, QVector<int> *adjacentBoxHits) const;
-    void addRocketEffect(int index, QVector<int> *hitCells, QVector<int> *adjacentBoxHits) const;
+    void addLineEffect(int row, int column, bool horizontal, QVector<int> *hitCells, QVector<int> *adjacentBoxHits, QVector<int> *directBoxHits, bool allowAdjacentBoxHits) const;
+    void addRocketEffect(int index, QVector<int> *hitCells, QVector<int> *adjacentBoxHits, QVector<int> *directBoxHits) const;
     void addBombEffect(int index, QVector<int> *hitCells, QVector<int> *directBoxHits) const;
     void addPropellerEffect(int index, bool allowBoxTarget, QVector<int> *hitCells, QVector<int> *directBoxHits);
     int findOppositeRocketTarget(int rocketIndex) const;
@@ -197,7 +197,7 @@ private:
     QString cellLabel(const Cell &cell) const;
 
     static constexpr int kRows = 8;
-    static constexpr int kColumns = 8;
+    static constexpr int kColumns = 9;
     static constexpr int kAnimationDelayMs = 170;
     static constexpr int kColorCount = 5;
 
