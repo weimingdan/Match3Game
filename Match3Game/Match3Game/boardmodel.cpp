@@ -14,30 +14,11 @@ using ItemType = BoardModel::ItemType;
 constexpr int kBoardRows = 8;
 constexpr int kBoardColumns = 8;
 
-struct SeedCell {
-    ItemType type;
-    int colorId;
-};
-
-constexpr SeedCell normal(int colorId)
-{
-    return { ItemType::Normal, colorId };
-}
-
-constexpr SeedCell special(ItemType type)
-{
-    return { type, -1 };
-}
-
-constexpr std::array<SeedCell, kBoardRows * kBoardColumns> kInitialBoard = {
-    normal(0), normal(1), normal(2), normal(3), normal(4), normal(0), normal(1), normal(2),
-    normal(1), normal(2), normal(3), normal(4), normal(0), normal(1), normal(2), normal(3),
-    normal(2), normal(3), normal(0), normal(0), normal(2), special(ItemType::RocketHorizontal), normal(4), normal(0),
-    normal(3), normal(4), normal(1), normal(1), normal(0), normal(4), special(ItemType::Propeller), normal(1),
-    normal(4), normal(0), special(ItemType::Box), normal(0), normal(4), normal(0), normal(1), normal(2),
-    normal(0), normal(1), normal(3), normal(4), normal(0), special(ItemType::Bomb), normal(2), normal(3),
-    normal(1), normal(2), normal(4), normal(0), special(ItemType::Box), normal(2), normal(3), normal(4),
-    normal(2), special(ItemType::RocketVertical), normal(0), normal(1), normal(2), normal(3), normal(4), special(ItemType::Box)
+constexpr std::array<QPoint, 13> kInitialBoxPositions = {
+    QPoint(0, 4), QPoint(7, 4),
+    QPoint(0, 5), QPoint(6, 5), QPoint(7, 5),
+    QPoint(0, 6), QPoint(6, 6), QPoint(7, 6),
+    QPoint(0, 7), QPoint(1, 7), QPoint(5, 7), QPoint(6, 7), QPoint(7, 7)
 };
 
 QVector<int> uniqueSorted(const QVector<int> &values)
@@ -222,9 +203,36 @@ void BoardModel::nextSeed()
 void BoardModel::initializeBoard()
 {
     m_cells.resize(kRows * kColumns);
+    std::fill(m_cells.begin(), m_cells.end(), Cell {});
 
-    for (int i = 0; i < m_cells.size(); ++i) {
-        m_cells[i] = { kInitialBoard[static_cast<std::size_t>(i)].type, kInitialBoard[static_cast<std::size_t>(i)].colorId };
+    const auto isInitialBoxPosition = [](int row, int column) {
+        for (const QPoint &position : kInitialBoxPositions) {
+            if (position.y() == row && position.x() == column) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    m_rng.seed(m_seed);
+
+    for (int row = 0; row < kRows; ++row) {
+        for (int column = 0; column < kColumns; ++column) {
+            Cell &cell = cellAt(row, column);
+            if (isInitialBoxPosition(row, column)) {
+                cell = { ItemType::Box, -1 };
+                continue;
+            }
+
+            int colorId = randomColorId();
+            int guard = 0;
+            while (createsImmediateMatch(row, column, colorId) && guard < 20) {
+                colorId = randomColorId();
+                ++guard;
+            }
+
+            cell = { ItemType::Normal, colorId };
+        }
     }
 
     m_remainingBoxes = 0;
@@ -241,8 +249,7 @@ void BoardModel::initializeBoard()
     m_gameWon = false;
     m_state = State::Idle;
     m_chainCount = 0;
-    m_rng.seed(m_seed);
-    m_statusText = QStringLiteral("Tasks 10-17 are live. Same seed reproduces the same demo flow.");
+    m_statusText = QStringLiteral("参考视频样式已对齐：固定箱子布局，初始只生成普通元素，同一 seed 可复现。");
 }
 
 void BoardModel::setSelectedIndex(int index)
@@ -1217,6 +1224,29 @@ int BoardModel::randomColorId()
 BoardModel::Cell BoardModel::randomNormalCell()
 {
     return { ItemType::Normal, randomColorId() };
+}
+
+bool BoardModel::createsImmediateMatch(int row, int column, int colorId) const
+{
+    if (column >= 2) {
+        const Cell &left = cellAt(row, column - 1);
+        const Cell &leftLeft = cellAt(row, column - 2);
+        if (isMatchable(left) && isMatchable(leftLeft)
+            && left.colorId == colorId && leftLeft.colorId == colorId) {
+            return true;
+        }
+    }
+
+    if (row >= 2) {
+        const Cell &up = cellAt(row - 1, column);
+        const Cell &upUp = cellAt(row - 2, column);
+        if (isMatchable(up) && isMatchable(upUp)
+            && up.colorId == colorId && upUp.colorId == colorId) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QString BoardModel::typeName(ItemType type) const

@@ -191,6 +191,7 @@ private:
     bool refillEmptyCells();
     int randomColorId();
     Cell randomNormalCell();
+    bool createsImmediateMatch(int row, int column, int colorId) const;
 
     QString typeName(ItemType type) const;
     QString cellLabel(const Cell &cell) const;

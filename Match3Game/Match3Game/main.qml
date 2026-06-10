@@ -5,622 +5,617 @@ Window {
     id: root
 
     visible: true
-    width: 980
-    height: 860
+    width: 860
+    height: 1120
     minimumWidth: 760
-    minimumHeight: 700
-    title: "Match3 Tools Demo"
-    color: "#0d1720"
+    minimumHeight: 920
+    title: "Match3 Demo"
+    color: "#081421"
 
-    property real boardPixels: Math.min(width - 96, height - 260, 620)
+    property real boardPixels: Math.min(width - 120, height - 360, 640)
     property real cellPixels: Math.floor(boardPixels / boardModel.columns)
 
-    function gemColor(colorId) {
+    function pieceColor(colorId) {
         switch (colorId) {
         case 0:
-            return "#ff7463"
+            return "#ff3138"
         case 1:
-            return "#f7b538"
+            return "#ffc72f"
         case 2:
-            return "#36c9a4"
+            return "#1fdd2f"
         case 3:
-            return "#54a6ff"
+            return "#2878ff"
         case 4:
-            return "#c779ff"
+            return "#ff8a1f"
         default:
-            return "#8896a5"
+            return "#8ca0ba"
         }
     }
 
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "#142534" }
-            GradientStop { position: 0.52; color: "#10212f" }
-            GradientStop { position: 1.0; color: "#0a131b" }
+            GradientStop { position: 0.0; color: "#112a45" }
+            GradientStop { position: 0.35; color: "#0a223a" }
+            GradientStop { position: 0.72; color: "#08192b" }
+            GradientStop { position: 1.0; color: "#06111b" }
         }
     }
 
     Rectangle {
-        width: 340
-        height: 340
-        radius: 170
-        x: -70
-        y: -80
-        color: "#1d4252"
-        opacity: 0.24
+        anchors.fill: parent
+        opacity: 0.14
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#7ec9ff" }
+            GradientStop { position: 0.16; color: "transparent" }
+            GradientStop { position: 0.34; color: "#7ec9ff" }
+            GradientStop { position: 0.5; color: "transparent" }
+            GradientStop { position: 0.68; color: "#7ec9ff" }
+            GradientStop { position: 1.0; color: "transparent" }
+        }
+        rotation: 9
+        scale: 1.35
     }
 
-    Rectangle {
-        width: 280
-        height: 280
-        radius: 140
-        anchors.right: parent.right
-        anchors.rightMargin: -50
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: -70
-        color: "#4f2a2d"
-        opacity: 0.25
+    Repeater {
+        model: 40
+        delegate: Rectangle {
+            width: 6 + (index % 4)
+            height: width
+            radius: width / 2
+            color: "#f6fbff"
+            opacity: 0.75
+            x: (index * 137) % root.width
+            y: (index * 211) % root.height
+        }
     }
 
     Item {
         anchors.fill: parent
-        anchors.margins: 28
+        anchors.margins: 36
 
         Column {
-            anchors.fill: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: parent.width
             spacing: 18
 
-            Text {
-                text: "Match-3 Tools Demo"
-                color: "#f6efe4"
-                font.family: "Trebuchet MS"
-                font.pixelSize: 34
-                font.bold: true
-            }
-
-            Text {
-                width: parent.width
-                text: "Tasks 10-14: tool generation, rocket line clear, bomb 5x5 clear, propeller top-box target, and rocket + propeller special swap."
-                wrapMode: Text.WordWrap
-                color: "#d5dee7"
-                font.pixelSize: 15
-                lineHeight: 1.2
-            }
-
-            Row {
-                spacing: 12
+            Rectangle {
+                width: 310
+                height: 88
+                radius: 32
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: "#fff3e6"
+                border.color: "#efd0bc"
+                border.width: 2
 
                 Rectangle {
-                    width: 160
-                    height: 74
-                    radius: 20
-                    color: "#1f3445"
-                    border.color: "#355167"
-                    border.width: 1
-
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 2
-
-                        Text {
-                            text: "Boxes Left"
-                            color: "#9cb0c1"
-                            font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width
-                        }
-
-                        Text {
-                            text: boardModel.remainingBoxes + " / " + boardModel.targetBoxes
-                            color: "#fff5db"
-                            font.pixelSize: 24
-                            font.bold: true
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width
-                        }
-                    }
-                }
-
-                Rectangle {
-                    width: 150
-                    height: 74
-                    radius: 20
-                    color: boardModel.inputLocked ? "#4f2f29" : "#17382d"
-                    border.color: boardModel.inputLocked ? "#a46352" : "#2b7461"
-                    border.width: 1
-
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 2
-
-                        Text {
-                            text: "Input"
-                            color: "#d4dddf"
-                            font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width
-                        }
-
-                        Text {
-                            text: boardModel.inputLocked ? "LOCKED" : "READY"
-                            color: "#fff2d2"
-                            font.pixelSize: 22
-                            font.bold: true
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width
-                        }
-                    }
-                }
-
-                Rectangle {
-                    width: 170
-                    height: 74
-                    radius: 20
-                    color: "#2f2340"
-                    border.color: "#6c58a7"
-                    border.width: 1
-
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 2
-
-                        Text {
-                            text: "Seed"
-                            color: "#c9c0dd"
-                            font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width
-                        }
-
-                        Text {
-                            text: boardModel.seed
-                            color: "#f5eaff"
-                            font.pixelSize: 22
-                            font.bold: true
-                            horizontalAlignment: Text.AlignHCenter
-                            width: parent.width
-                        }
-                    }
-                }
-
-                Rectangle {
-                    height: 74
-                    width: root.width - 612
-                    radius: 20
-                    color: "#1a2733"
-                    border.color: "#33495d"
-                    border.width: 1
-
-                    Text {
-                        anchors.fill: parent
-                        anchors.margins: 18
-                        text: boardModel.statusText
-                        color: "#ebf1f5"
-                        wrapMode: Text.WordWrap
-                        verticalAlignment: Text.AlignVCenter
-                        font.pixelSize: 14
-                    }
-                }
-            }
-
-            Item {
-                width: parent.width
-                height: parent.height - y
-
-                Rectangle {
-                    id: boardCard
-                    width: root.cellPixels * boardModel.columns + 32
-                    height: root.cellPixels * boardModel.rows + 32
-                    radius: 28
-                    color: "#142230"
-                    border.color: "#345064"
-                    border.width: 1
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        radius: 22
-                        color: "#101a24"
-                    }
-
-                    Grid {
-                        id: boardGrid
-                        anchors.centerIn: parent
-                        columns: boardModel.columns
-                        rowSpacing: 0
-                        columnSpacing: 0
-
-                        Repeater {
-                            model: boardModel
-
-                            delegate: Item {
-                                width: root.cellPixels
-                                height: root.cellPixels
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    color: (index + Math.floor(index / boardModel.columns)) % 2 === 0 ? "#243746" : "#203240"
-                                    border.color: "#2d4354"
-                                    border.width: 1
-                                }
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    anchors.margins: 7
-                                    radius: 18
-                                    color: cellTypeName === "empty" ? "transparent" : "#16222d"
-                                    border.color: cellTypeName === "empty" ? "#436075" : "#17232e"
-                                    border.width: cellTypeName === "empty" ? 2 : 0
-                                    opacity: cellTypeName === "empty" ? 0.7 : 1.0
-                                }
-
-                                Item {
-                                    anchors.fill: parent
-                                    anchors.margins: 8
-                                    visible: cellTypeName === "normal"
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: 16
-                                        color: root.gemColor(cellColor)
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.54
-                                        height: width
-                                        radius: width / 2
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        anchors.top: parent.top
-                                        anchors.topMargin: 7
-                                        color: "#ffffff"
-                                        opacity: 0.24
-                                    }
-                                }
-
-                                Item {
-                                    anchors.fill: parent
-                                    anchors.margins: 8
-                                    visible: cellTypeName === "box"
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: 14
-                                        color: "#8d5b33"
-                                        border.color: "#d8a46b"
-                                        border.width: 2
-                                    }
-
-                                    Rectangle {
-                                        width: 4
-                                        height: parent.height - 14
-                                        anchors.centerIn: parent
-                                        color: "#d8a46b"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width - 14
-                                        height: 4
-                                        anchors.centerIn: parent
-                                        color: "#d8a46b"
-                                    }
-                                }
-
-                                Item {
-                                    anchors.fill: parent
-                                    anchors.margins: 8
-                                    visible: cellTypeName === "rocketHorizontal" || cellTypeName === "rocketVertical"
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: 16
-                                        color: cellTypeName === "rocketHorizontal" ? "#ffd26a" : "#7fd2ff"
-                                    }
-
-                                    Item {
-                                        anchors.fill: parent
-                                        visible: cellTypeName === "rocketHorizontal"
-
-                                        Rectangle {
-                                            x: parent.width * 0.16
-                                            y: parent.height * 0.33
-                                            width: parent.width * 0.48
-                                            height: parent.height * 0.34
-                                            radius: 8
-                                            color: "#fff8e7"
-                                        }
-
-                                        Rectangle {
-                                            x: parent.width * 0.58
-                                            y: parent.height * 0.25
-                                            width: parent.width * 0.2
-                                            height: parent.height * 0.5
-                                            rotation: 45
-                                            radius: 4
-                                            color: "#ff6b57"
-                                        }
-
-                                        Rectangle {
-                                            x: parent.width * 0.08
-                                            y: parent.height * 0.2
-                                            width: parent.width * 0.16
-                                            height: parent.height * 0.18
-                                            rotation: -28
-                                            radius: 3
-                                            color: "#26485c"
-                                        }
-
-                                        Rectangle {
-                                            x: parent.width * 0.08
-                                            y: parent.height * 0.62
-                                            width: parent.width * 0.16
-                                            height: parent.height * 0.18
-                                            rotation: 28
-                                            radius: 3
-                                            color: "#26485c"
-                                        }
-                                    }
-
-                                    Item {
-                                        anchors.fill: parent
-                                        visible: cellTypeName === "rocketVertical"
-
-                                        Rectangle {
-                                            x: parent.width * 0.33
-                                            y: parent.height * 0.16
-                                            width: parent.width * 0.34
-                                            height: parent.height * 0.48
-                                            radius: 8
-                                            color: "#fff8e7"
-                                        }
-
-                                        Rectangle {
-                                            x: parent.width * 0.25
-                                            y: parent.height * 0.02
-                                            width: parent.width * 0.5
-                                            height: parent.height * 0.22
-                                            rotation: 45
-                                            radius: 4
-                                            color: "#ff8a57"
-                                        }
-
-                                        Rectangle {
-                                            x: parent.width * 0.2
-                                            y: parent.height * 0.74
-                                            width: parent.width * 0.18
-                                            height: parent.height * 0.16
-                                            rotation: -28
-                                            radius: 3
-                                            color: "#20435e"
-                                        }
-
-                                        Rectangle {
-                                            x: parent.width * 0.62
-                                            y: parent.height * 0.74
-                                            width: parent.width * 0.18
-                                            height: parent.height * 0.16
-                                            rotation: 28
-                                            radius: 3
-                                            color: "#20435e"
-                                        }
-                                    }
-                                }
-
-                                Item {
-                                    anchors.fill: parent
-                                    anchors.margins: 8
-                                    visible: cellTypeName === "bomb"
-
-                                    Rectangle {
-                                        width: parent.width * 0.76
-                                        height: width
-                                        radius: width / 2
-                                        anchors.centerIn: parent
-                                        color: "#262833"
-                                        border.color: "#ffb347"
-                                        border.width: 3
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.32
-                                        height: parent.height * 0.08
-                                        radius: 3
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        anchors.top: parent.top
-                                        anchors.topMargin: 8
-                                        rotation: -24
-                                        color: "#f2c078"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.18
-                                        height: width
-                                        radius: width / 2
-                                        anchors.horizontalCenter: parent.horizontalCenter
-                                        anchors.top: parent.top
-                                        anchors.topMargin: 2
-                                        color: "#fff1a8"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.24
-                                        height: width
-                                        radius: width / 2
-                                        anchors.centerIn: parent
-                                        color: "#ffcf63"
-                                        opacity: 0.35
-                                    }
-                                }
-
-                                Item {
-                                    anchors.fill: parent
-                                    anchors.margins: 8
-                                    visible: cellTypeName === "propeller"
-
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: 16
-                                        color: "#d7fff4"
-                                        opacity: 0.18
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.26
-                                        height: parent.height * 0.62
-                                        radius: 8
-                                        anchors.centerIn: parent
-                                        color: "#7de0b1"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.26
-                                        height: parent.height * 0.62
-                                        radius: 8
-                                        anchors.centerIn: parent
-                                        rotation: 90
-                                        color: "#ffd66c"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.22
-                                        height: parent.height * 0.46
-                                        radius: 8
-                                        anchors.centerIn: parent
-                                        rotation: 45
-                                        color: "#56c6ff"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.22
-                                        height: parent.height * 0.46
-                                        radius: 8
-                                        anchors.centerIn: parent
-                                        rotation: -45
-                                        color: "#ff8a7f"
-                                    }
-
-                                    Rectangle {
-                                        width: parent.width * 0.26
-                                        height: width
-                                        radius: width / 2
-                                        anchors.centerIn: parent
-                                        color: "#ffffff"
-                                        border.color: "#4d6f7a"
-                                        border.width: 2
-                                    }
-                                }
-
-                                Rectangle {
-                                    anchors.fill: parent
-                                    anchors.margins: 4
-                                    radius: 20
-                                    color: "transparent"
-                                    border.color: selected ? "#fff4da" : "transparent"
-                                    border.width: 3
-                                }
-
-                                MouseArea {
-                                    anchors.fill: parent
-                                    enabled: !boardModel.inputLocked
-                                    onClicked: boardModel.clickCell(cellRow, cellColumn)
-                                }
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 28
-                        color: "#081015"
-                        opacity: boardModel.inputLocked ? 0.24 : 0.0
-                        visible: opacity > 0
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 28
-                        visible: boardModel.gameWon
-                        color: "#091219"
-                        opacity: 0.86
-
-                        Column {
-                            anchors.centerIn: parent
-                            spacing: 10
-
-                            Text {
-                                text: "GREAT"
-                                color: "#ffe3a3"
-                                font.family: "Trebuchet MS"
-                                font.pixelSize: 52
-                                font.bold: true
-                                horizontalAlignment: Text.AlignHCenter
-                                width: parent.width
-                            }
-
-                            Text {
-                                text: "All target boxes are gone."
-                                color: "#edf5ff"
-                                font.pixelSize: 18
-                                horizontalAlignment: Text.AlignHCenter
-                                width: parent.width
-                            }
-
-                            Text {
-                                text: "Reset with the same seed to replay, or move to the next seed."
-                                color: "#b7c6d6"
-                                font.pixelSize: 14
-                                horizontalAlignment: Text.AlignHCenter
-                                width: parent.width
-                            }
-                        }
-                    }
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    radius: 24
+                    color: "#ffdcb7"
                 }
 
                 Row {
+                    anchors.centerIn: parent
                     spacing: 14
-                    anchors.top: boardCard.bottom
-                    anchors.topMargin: 18
-                    anchors.horizontalCenter: parent.horizontalCenter
 
                     Rectangle {
-                        width: 172
-                        height: 52
-                        radius: 18
-                        color: "#f0dcc0"
+                        width: 42
+                        height: 42
+                        radius: 12
+                        color: "#ef7f1a"
+                        border.color: "#cc5f03"
+                        border.width: 2
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Reset Same Seed"
-                            color: "#33271d"
-                            font.pixelSize: 16
-                            font.bold: true
+                        Rectangle {
+                            width: 5
+                            height: parent.height
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            color: "#ffac55"
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: boardModel.resetBoard()
+                        Rectangle {
+                            width: parent.width
+                            height: 5
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: "#ffac55"
                         }
                     }
 
-                    Rectangle {
-                        width: 156
-                        height: 52
-                        radius: 18
-                        color: "#2f6a62"
+                    Text {
+                        text: boardModel.remainingBoxes
+                        color: "#1b2b4a"
+                        font.family: "Trebuchet MS"
+                        font.pixelSize: 34
+                        font.bold: true
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: boardModel.statusText
+                width: 520
+                wrapMode: Text.WordWrap
+                horizontalAlignment: Text.AlignHCenter
+                color: "#e9f3ff"
+                font.pixelSize: 16
+                lineHeight: 1.2
+            }
+
+            Rectangle {
+                id: boardFrame
+                width: root.cellPixels * boardModel.columns + 22
+                height: root.cellPixels * boardModel.rows + 22
+                radius: 20
+                anchors.horizontalCenter: parent.horizontalCenter
+                color: "#67d1ff"
+                border.color: "#b4efff"
+                border.width: 3
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    radius: 15
+                    color: "#8bdcff"
+                }
+
+                Grid {
+                    anchors.centerIn: parent
+                    columns: boardModel.columns
+                    rowSpacing: 0
+                    columnSpacing: 0
+
+                    Repeater {
+                        model: boardModel
+
+                        delegate: Item {
+                            width: root.cellPixels
+                            height: root.cellPixels
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: ((index + Math.floor(index / boardModel.columns)) % 2 === 0) ? "#b9e6ff" : "#acdfff"
+                                border.color: "#8fcef8"
+                                border.width: 1
+                            }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 5
+                                radius: 14
+                                color: cellTypeName === "empty" ? "transparent" : "#ffffff"
+                                opacity: cellTypeName === "empty" ? 0.25 : 0.12
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                visible: cellTypeName === "normal" && cellColor === 0
+
+                                Rectangle {
+                                    x: parent.width * 0.12
+                                    y: parent.height * 0.22
+                                    width: parent.width * 0.76
+                                    height: parent.height * 0.5
+                                    radius: 16
+                                    color: "#ff2f38"
+                                    border.color: "#d70e18"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.4
+                                    height: parent.height * 0.18
+                                    radius: 8
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 8
+                                    color: "#ff8a8c"
+                                    opacity: 0.45
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                visible: cellTypeName === "normal" && cellColor === 1
+
+                                Rectangle {
+                                    x: parent.width * 0.22
+                                    y: parent.height * 0.12
+                                    width: parent.width * 0.56
+                                    height: parent.height * 0.68
+                                    radius: 18
+                                    color: "#ffc228"
+                                    border.color: "#e39f00"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.24
+                                    height: parent.height * 0.12
+                                    radius: 6
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 10
+                                    color: "#ffe18b"
+                                    opacity: 0.65
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                visible: cellTypeName === "normal" && cellColor === 2
+
+                                Rectangle {
+                                    width: parent.width * 0.62
+                                    height: parent.height * 0.72
+                                    radius: width / 2
+                                    anchors.centerIn: parent
+                                    rotation: 38
+                                    color: "#18d82d"
+                                    border.color: "#11aa22"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: 5
+                                    height: parent.height * 0.22
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 8
+                                    color: "#0f8a1d"
+                                    rotation: -20
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                visible: cellTypeName === "normal" && cellColor === 3
+
+                                Rectangle {
+                                    x: parent.width * 0.16
+                                    y: parent.height * 0.14
+                                    width: parent.width * 0.68
+                                    height: parent.height * 0.68
+                                    radius: 14
+                                    color: "#2b75ff"
+                                    border.color: "#0f57d7"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.18
+                                    height: width
+                                    radius: width / 2
+                                    anchors.centerIn: parent
+                                    color: "#5fa6ff"
+                                    opacity: 0.32
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 7
+                                visible: cellTypeName === "normal" && cellColor === 4
+
+                                Rectangle {
+                                    width: parent.width * 0.54
+                                    height: parent.height * 0.7
+                                    radius: 20
+                                    anchors.centerIn: parent
+                                    color: "#ff8a1f"
+                                    border.color: "#d16606"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.14
+                                    height: parent.height * 0.14
+                                    radius: width / 2
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 7
+                                    color: "#ffd29f"
+                                    opacity: 0.7
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                visible: cellTypeName === "box"
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 12
+                                    color: "#ef7f1a"
+                                    border.color: "#cf5f02"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: 5
+                                    height: parent.height
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    color: "#ffb15c"
+                                }
+
+                                Rectangle {
+                                    width: parent.width
+                                    height: 5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    color: "#ffb15c"
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                visible: cellTypeName === "rocketHorizontal" || cellTypeName === "rocketVertical"
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 14
+                                    color: "#ffa62a"
+                                    border.color: "#d36d00"
+                                    border.width: 2
+                                }
+
+                                Rectangle {
+                                    width: cellTypeName === "rocketHorizontal" ? parent.width * 0.58 : parent.width * 0.28
+                                    height: cellTypeName === "rocketHorizontal" ? parent.height * 0.28 : parent.height * 0.58
+                                    anchors.centerIn: parent
+                                    radius: 8
+                                    color: "#6f3fdc"
+                                }
+
+                                Rectangle {
+                                    width: cellTypeName === "rocketHorizontal" ? parent.width * 0.22 : parent.width * 0.5
+                                    height: cellTypeName === "rocketHorizontal" ? parent.height * 0.46 : parent.height * 0.22
+                                    anchors.centerIn: parent
+                                    radius: 6
+                                    rotation: 45
+                                    color: "#fff3e0"
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                visible: cellTypeName === "bomb"
+
+                                Rectangle {
+                                    width: parent.width * 0.76
+                                    height: width
+                                    radius: width / 2
+                                    anchors.centerIn: parent
+                                    color: "#2b3443"
+                                    border.color: "#ffb43a"
+                                    border.width: 3
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.26
+                                    height: 6
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 6
+                                    radius: 3
+                                    rotation: -24
+                                    color: "#ffd28e"
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.16
+                                    height: width
+                                    radius: width / 2
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 2
+                                    color: "#fff3aa"
+                                }
+                            }
+
+                            Item {
+                                anchors.fill: parent
+                                anchors.margins: 8
+                                visible: cellTypeName === "propeller"
+
+                                Rectangle {
+                                    width: parent.width * 0.28
+                                    height: parent.height * 0.68
+                                    anchors.centerIn: parent
+                                    radius: 8
+                                    color: "#ffd144"
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.28
+                                    height: parent.height * 0.68
+                                    anchors.centerIn: parent
+                                    radius: 8
+                                    rotation: 90
+                                    color: "#ff4a4f"
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.2
+                                    height: parent.height * 0.46
+                                    anchors.centerIn: parent
+                                    radius: 8
+                                    rotation: 45
+                                    color: "#2ad561"
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.2
+                                    height: parent.height * 0.46
+                                    anchors.centerIn: parent
+                                    radius: 8
+                                    rotation: -45
+                                    color: "#2e7dff"
+                                }
+
+                                Rectangle {
+                                    width: parent.width * 0.26
+                                    height: width
+                                    radius: width / 2
+                                    anchors.centerIn: parent
+                                    color: "#fff7de"
+                                    border.color: "#ad6d2c"
+                                    border.width: 2
+                                }
+                            }
+
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: 3
+                                radius: 16
+                                color: "transparent"
+                                border.color: selected ? "#fff4cc" : "transparent"
+                                border.width: 4
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                enabled: !boardModel.inputLocked
+                                onClicked: boardModel.clickCell(cellRow, cellColumn)
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 20
+                    color: "#02111d"
+                    opacity: boardModel.inputLocked && !boardModel.gameWon ? 0.18 : 0.0
+                    visible: opacity > 0
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 20
+                    visible: boardModel.gameWon
+                    color: "#03121d"
+                    opacity: 0.88
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 14
 
                         Text {
-                            anchors.centerIn: parent
-                            text: "Next Seed"
-                            color: "#edf7f3"
-                            font.pixelSize: 16
+                            text: "Great"
+                            color: "#ffd53b"
+                            font.family: "Trebuchet MS"
+                            font.pixelSize: 58
                             font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                            width: parent.width
                         }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: boardModel.nextSeed()
+                        Rectangle {
+                            width: 110
+                            height: 110
+                            radius: 28
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            color: "#ef7f1a"
+                            border.color: "#cf5f02"
+                            border.width: 3
+
+                            Rectangle {
+                                width: 8
+                                height: parent.height
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                color: "#ffb15c"
+                            }
+
+                            Rectangle {
+                                width: parent.width
+                                height: 8
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: "#ffb15c"
+                            }
                         }
+
+                        Text {
+                            text: "所有箱子都清完了"
+                            color: "#eef7ff"
+                            font.pixelSize: 20
+                            horizontalAlignment: Text.AlignHCenter
+                            width: parent.width
+                        }
+                    }
+                }
+            }
+
+            Row {
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 14
+
+                Rectangle {
+                    width: 150
+                    height: 52
+                    radius: 18
+                    color: "#fff0dc"
+                    border.color: "#ebd1b5"
+                    border.width: 2
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "同 Seed 重开"
+                        color: "#3c2d20"
+                        font.pixelSize: 16
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: boardModel.resetBoard()
+                    }
+                }
+
+                Rectangle {
+                    width: 138
+                    height: 52
+                    radius: 18
+                    color: "#5b7cff"
+                    border.color: "#87a2ff"
+                    border.width: 2
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "下一 Seed"
+                        color: "#f5f8ff"
+                        font.pixelSize: 16
+                        font.bold: true
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: boardModel.nextSeed()
+                    }
+                }
+
+                Rectangle {
+                    width: 156
+                    height: 52
+                    radius: 18
+                    color: "#142a42"
+                    border.color: "#4f6d90"
+                    border.width: 2
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Seed " + boardModel.seed
+                        color: "#ecf4ff"
+                        font.pixelSize: 16
+                        font.bold: true
                     }
                 }
             }
