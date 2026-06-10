@@ -97,8 +97,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="boardengine.cpp"/>
     <ClCompile Include="boardmodel.cpp"/>
+    <ClCompile Include="boardstate.cpp"/>
     <ClCompile Include="main.cpp"/>
+    <ClInclude Include="boardengine.h"/>
+    <ClInclude Include="boardstate.h"/>
+    <ClInclude Include="boardtypes.h"/>
     <QtMoc Include="boardmodel.h"/>
     <QtRcc Include="qml.qrc"/>
     <None Include="main.qml"/>

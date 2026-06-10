@@ -23,12 +23,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="boardengine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="boardmodel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="boardstate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClInclude Include="boardengine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="boardstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="boardtypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <QtMoc Include="boardmodel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
