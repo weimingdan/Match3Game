@@ -2,7 +2,7 @@
 
 一个基于 `Qt Quick + C++` 的三消 [Demo](/Demo)，采用 `MSVC + QML` 工程结构，实现了一个以清除箱子为目标的 `9 列 x 8 排` 棋盘。
 
-[开发计划书.md](/D:/workspace/interview/Match3Game/开发计划书.md)
+[开发计划书.md](/开发计划书.md)
 
 ## 项目说明
 
